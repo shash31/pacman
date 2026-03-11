@@ -28,6 +28,8 @@ class Pacman {
                 this.nextTurn = { x: 1, y: 0 }
             } else if (e.code == 'ArrowLeft') {
                 this.nextTurn = { x: -1, y: 0 }
+            } else {
+                return
             }
             if (this.nextTurn.x == this.dir.x && this.nextTurn.y == this.dir.y) {
                 this.nextTurn = {}
