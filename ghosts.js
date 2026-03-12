@@ -2,6 +2,7 @@ class Ghost {
     constructor(x, y, color, speed) {
         this.x = gameX + x*cellWidth + cellWidth/2
         this.y = gameY + y*cellHeight + cellHeight/2
+        this.pos = { x: x, y: y}
         this.radius = cellHeight*0.3
         this.color = color
 

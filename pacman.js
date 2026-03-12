@@ -61,7 +61,6 @@ class Pacman {
         if (turn.x == this.dir.x || turn.y == this.dir.y) {
             this.dir.x = turn.x
             this.dir.y = turn.y
-            console.log(this.dir.x, this.dir.y)
             this.nextTurn = {}
             this.updatemouthangles();
             return
@@ -74,16 +73,18 @@ class Pacman {
 
     validFuturePos(xdir, ydir) {
         const futureposx = this.pos.x+xdir; const futureposy = this.pos.y+ydir;
-        if (this.inbounds(futureposx, futureposy) && (grid[futureposy][futureposx] != 1)) return true
+        if (this.inbounds(futureposx, futureposy) && (grid[futureposy][futureposx] != 'W')) return true
         return false
     }
 
     inbounds(x, y) {
-        if ((0 <= x) && (x < gridSize) && (0 <= y) && (y < gridSize)) return true
+        if ((0 <= x) && (x < gridWidth) && (0 <= y) && (y < gridHeight)) return true
         return false
     }
 
     draw() {
+        // console.log('in pacman.draw')
+        // console.log(this.x, this.y)
         c.fillStyle = 'yellow'
         c.beginPath()
         if (this.mouthbottom <= this.mouthclose) {
@@ -142,7 +143,10 @@ class Pacman {
     updatepos() {
         this.pos.x = Math.floor((this.x - gameX)/cellWidth)
         this.pos.y = Math.floor((this.y - gameY)/cellHeight)
-        console.log(this.pos.x, this.pos.y)
+        if (grid[this.pos.y][this.pos.x] == 'F') {
+            score += 10
+            grid[this.pos.y][this.pos.x] = 0
+        }
     }
 
     stop() {
@@ -155,7 +159,6 @@ class Pacman {
         this.updatemouth();
 
         // Handle turning at intersections
-        // if (this.turning && this.validFuturePos(this.nextTurn.x, this.nextTurn.y)) {
         if (this.turning) {
             if (this.validFuturePos(this.nextTurn.x, this.nextTurn.y)) {
                 const xcenter = (this.x+(cellWidth/2)-gameX)%cellWidth
@@ -188,8 +191,8 @@ class Pacman {
 
         }
 
-        if ((this.x >= (gameX+(cellWidth/2))) && (this.x <= (gameX+((gridSize-1)*cellWidth)+(cellWidth/2)))
-            && (this.y >= (gameY+(cellHeight/2))) && (this.y <= (gameY+((gridSize-1)*cellHeight)+(cellHeight/2)))) {
+        if ((this.x >= (gameX+(cellWidth/2))) && (this.x <= (gameX+((gridWidth-1)*cellWidth)+(cellWidth/2)))
+            && (this.y >= (gameY+(cellHeight/2))) && (this.y <= (gameY+((gridHeight-1)*cellHeight)+(cellHeight/2)))) {
             this.x += this.dir.x*this.speed
             this.y += this.dir.y*this.speed
 
