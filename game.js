@@ -8,7 +8,7 @@ const c = canvas.getContext('2d')
 // TODO:
 // 1) Add walls
 // 2) Add boosts/food or whatever
-// 3) Add score functionality
+// 3) Add food/score functionality
 // 4) Make ghosts chase you
 
 const gameWidth = canvas.width*0.4
@@ -33,16 +33,41 @@ const blueghost = new Ghost(6, 5, 'darkblue', ghostspeed)
 
 const boosts = []
 
+let grid = []
+
+function initGrid() {
+    for (let i = 0; i < gridSize; i++) {
+        grid.push([])
+        for (let j = 0; j < gridSize; j++) {
+            if ((i == 3 || i == 7) && (j > 1 && j < 8)) {
+                grid[i].push(1)
+                continue
+            }
+            grid[i].push(0)
+        }
+    }
+}
+
+initGrid()
+console.log(grid)
+
 function drawGrid() {
     for (let i = 1; i < gridSize+1; i++) {
         for (let j = 1; j < gridSize+1; j++) {
+            c.beginPath()
+            if (grid[i-1][j-1] == 1) {
+                // console.log(i-1, j-1)
+                c.strokeRect(gameX+((j-1)*cellWidth), gameY+((i-1)*cellHeight), cellWidth, cellHeight)
+                continue
+            }
             if (!((i == 10) || (j == 10))) {
-                c.beginPath()
-                c.arc(gameX+(i*cellWidth), gameY+(j*cellHeight), 4, 0, Math.PI*2)
-                c.stroke()
+                if (grid[i][j] != 1 && grid[i][j-1] != 1 && grid[i-1][j] != 1) {
+                    c.arc(gameX+(j*cellWidth), gameY+(i*cellHeight), 4, 0, Math.PI*2)
+                    c.stroke()
+                }
             }
             c.fillStyle = 'orange'
-            c.fillRect(gameX+(i*cellWidth)-(cellWidth/2)-2, gameY+(j*cellHeight)-(cellHeight/2)-2, 4, 4)
+            c.fillRect(gameX+(j*cellWidth)-(cellWidth/2)-2, gameY+(i*cellHeight)-(cellHeight/2)-2, 4, 4)
         }
     }
 }

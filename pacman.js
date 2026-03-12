@@ -2,7 +2,7 @@ class Pacman {
     constructor(speed) {
         this.x = gameX+(cellWidth/2)
         this.y = gameY+(cellHeight/2)
-        // this.pos = { x: 0, y: 0 }
+        this.pos = { x: 0, y: 0 }
 
         // Mouth eating animation
         // 0 is on right side of circle and pi is on left side
@@ -14,40 +14,73 @@ class Pacman {
         this.radius = cellHeight*0.3
         this.dir = { x: 0, y: 0 }
         this.nextTurn = {}
+        this.turningQueue = []
         this.turning = false
         this.speed = speed
     }
 
     turn(e) {
-        if (!this.turning) {
-            if (e.code == 'ArrowDown') {
-                this.nextTurn = { x: 0, y: 1 }
-            } else if (e.code == 'ArrowUp') {
-                this.nextTurn = { x: 0, y: -1 }
-            } else if (e.code == 'ArrowRight') {
-                this.nextTurn = { x: 1, y: 0 }
-            } else if (e.code == 'ArrowLeft') {
-                this.nextTurn = { x: -1, y: 0 }
-            } else {
-                return
-            }
-            if (this.nextTurn.x == this.dir.x && this.nextTurn.y == this.dir.y) {
-                this.nextTurn = {}
-                return
-            }
-
-            // If turn is in opposite direction, we can immediately change direction
-            if (this.nextTurn.x == this.dir.x || this.nextTurn.y == this.dir.y) {
-                this.dir.x = this.nextTurn.x
-                this.dir.y = this.nextTurn.y
-                this.nextTurn = {}
-                this.updatemouthangles();
-                return
-            }
-
-            // Turn is adjacent; Handle at intersection
-            this.turning = true
+        let turn;
+        if (e.code == 'ArrowDown') {
+            turn = { x: 0, y: 1 }
+        } else if (e.code == 'ArrowUp') {
+            turn = { x: 0, y: -1 }
+        } else if (e.code == 'ArrowRight') {
+            turn = { x: 1, y: 0 }
+        } else if (e.code == 'ArrowLeft') {
+            turn = { x: -1, y: 0 }
+        } else {
+            return
         }
+
+        // Add to queue if turning is in progress
+        if (this.turning) {
+            // Only store 2 turns at a time (could change/add later)
+            if (this.turningQueue.length < 2) {
+                let lastTurn
+                if (this.turningQueue.length == 0) {
+                    lastTurn = this.nextTurn
+                } else {
+                    lastTurn = this.turningQueue[this.turningQueue.length-1] 
+                }
+                if (lastTurn.x == turn.x && lastTurn.y == turn.y) return
+                this.turningQueue.push(turn)
+                console.log(this.turningQueue)
+            }
+            return
+        }
+
+        // If turn is already current direction, then invalid
+        if ((turn.x == this.dir.x && turn.y == this.dir.y)) {
+            // At this point, there isn't a queue
+            this.nextTurn = {}
+            return
+        }
+
+        // If turn is in opposite direction, we can immediately change direction
+        if (turn.x == this.dir.x || turn.y == this.dir.y) {
+            this.dir.x = turn.x
+            this.dir.y = turn.y
+            console.log(this.dir.x, this.dir.y)
+            this.nextTurn = {}
+            this.updatemouthangles();
+            return
+        }
+
+        // Turn is adjacent; Handle at intersection
+        this.nextTurn.x = turn.x; this.nextTurn.y = turn.y
+        this.turning = true
+    }
+
+    validFuturePos(xdir, ydir) {
+        const futureposx = this.pos.x+xdir; const futureposy = this.pos.y+ydir;
+        if (this.inbounds(futureposx, futureposy) && (grid[futureposy][futureposx] != 1)) return true
+        return false
+    }
+
+    inbounds(x, y) {
+        if ((0 <= x) && (x < gridSize) && (0 <= y) && (y < gridSize)) return true
+        return false
     }
 
     draw() {
@@ -69,8 +102,8 @@ class Pacman {
     }
 
     align() {
-        this.x = gameX + Math.floor((this.x - gameX)/cellWidth)*cellWidth + (cellWidth/2)
-        this.y = gameY + Math.floor((this.y - gameY)/cellHeight)*cellHeight + (cellHeight/2)
+        this.x = gameX + this.pos.x*cellWidth + (cellWidth/2)
+        this.y = gameY + this.pos.y*cellHeight + (cellHeight/2)
     }
 
     updatemouthangles() {
@@ -106,47 +139,87 @@ class Pacman {
         }
     }
 
+    updatepos() {
+        this.pos.x = Math.floor((this.x - gameX)/cellWidth)
+        this.pos.y = Math.floor((this.y - gameY)/cellHeight)
+        console.log(this.pos.x, this.pos.y)
+    }
+
+    stop() {
+        this.align()
+        this.dir.x = 0
+        this.dir.y = 0
+    }
+
     update() {
         this.updatemouth();
 
         // Handle turning at intersections
+        // if (this.turning && this.validFuturePos(this.nextTurn.x, this.nextTurn.y)) {
         if (this.turning) {
-            const xcenter = (this.x+(cellWidth/2)-gameX)%cellWidth
-            const ycenter = (this.y+(cellHeight/2)-gameY)%cellHeight
-            const xmargin = cellWidth*0.04
-            const ymargin = cellHeight*0.04
-            const xalign = this.within(xcenter, cellWidth, xmargin) || this.within(xcenter, 0, xmargin)
-            const yalign = this.within(ycenter, cellHeight, ymargin) || this.within(ycenter, 0, ymargin)
-            if (xalign && yalign){
-                this.dir.x = this.nextTurn.x; this.dir.y = this.nextTurn.y
-                this.nextTurn = {}
-                this.turning = false
-                this.align()
-                this.updatemouthangles();
+            if (this.validFuturePos(this.nextTurn.x, this.nextTurn.y)) {
+                const xcenter = (this.x+(cellWidth/2)-gameX)%cellWidth
+                const ycenter = (this.y+(cellHeight/2)-gameY)%cellHeight
+                const xmargin = cellWidth*0.04
+                const ymargin = cellHeight*0.04
+                const xalign = this.within(xcenter, cellWidth, xmargin) || this.within(xcenter, 0, xmargin)
+                const yalign = this.within(ycenter, cellHeight, ymargin) || this.within(ycenter, 0, ymargin)
+                if (xalign && yalign){
+                    this.dir.x = this.nextTurn.x; this.dir.y = this.nextTurn.y
+                    if (this.turningQueue.length >= 1) {
+                        console.log('going to next turn in queue')
+                        this.nextTurn = this.turningQueue[0]
+                        this.turningQueue.splice(0, 1)
+                    } else {
+                        this.nextTurn = {}
+                        this.turning = false
+                    }
+                    this.align()
+                    this.updatemouthangles();
+                }
+            } else {
+                // Running into wall/border
+                // If turns waiting in queue, skip this one
+                if (this.turningQueue.length != 0) {
+                    this.nextTurn = this.turningQueue[0]
+                    this.turningQueue.splice(0, 1)
+                }
             }
 
         }
 
-        if ((this.x >= (gameX+(cellWidth/2))) && (this.x<= (gameX+((gridSize-1)*cellWidth)+(cellWidth/2)))) {
+        if ((this.x >= (gameX+(cellWidth/2))) && (this.x <= (gameX+((gridSize-1)*cellWidth)+(cellWidth/2)))
+            && (this.y >= (gameY+(cellHeight/2))) && (this.y <= (gameY+((gridSize-1)*cellHeight)+(cellHeight/2)))) {
             this.x += this.dir.x*this.speed
-        } else {
-            if ((this.x-this.radius) > gameX){
-                this.align()
-            } else {
-                this.x = gameX + (cellWidth/2)
-            }
-            this.dir.x = 0
-        }
-
-        if ((this.y >= (gameY+(cellHeight/2))) && (this.y <= (gameY+((gridSize-1)*cellHeight)+(cellHeight/2)))) {
             this.y += this.dir.y*this.speed
-        } else {
-            if ((this.y-this.radius) > gameY) {
-                this.align()
-            } else {
-                this.y = gameY + (cellHeight/2)
+
+            this.updatepos()
+            
+            if (!this.validFuturePos(this.dir.x, this.dir.y)) {
+                if (this.dir.x == 1) {
+                    if (this.x > (gameX+(this.pos.x*cellWidth)+(cellWidth/2))) {
+                        this.stop()
+                        return
+                    }
+                } else if (this.dir.x == -1) {
+                    if (this.x < (gameX+(this.pos.x*cellWidth)+(cellWidth/2))) {
+                        this.stop()
+                        return
+                    }
+                } else if (this.dir.y == 1) {
+                    if (this.y > (gameY+(this.pos.y*cellHeight)+(cellHeight/2))) {
+                        this.stop()
+                        return
+                    }
+                } else if (this.dir.y == -1) {
+                    if (this.y < (gameY+(this.pos.y*cellHeight)+(cellHeight/2))) {
+                        this.stop()
+                        return
+                    }
+                }
             }
-            this.dir.y = 0
+        } else {
+            this.stop()
         }
     }
 }
