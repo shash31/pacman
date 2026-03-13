@@ -6,15 +6,10 @@ class Ghost {
         this.radius = cellHeight*0.3
         this.color = color
 
-        // Initializing with random direction
         this.dir = { x: 0, y: 0 }
-        if (Math.random() < 0.5) {
-            this.dir.x = Math.random() < 0.5 ? -1 : 1
-        } else {
-            this.dir.y = Math.random() < 0.5 ? -1 : 1
-        }
         this.nextTurn = undefined;
         this.speed = speed
+        this.newdir()
     }
 
     newdir() {
