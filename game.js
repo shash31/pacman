@@ -24,7 +24,7 @@ const customGridBtnRadius = canvas.height*0.1
 const pauseplayBtnX = canvas.width*0.9
 const pauseplayBtnY = canvas.height*0.5
 const pauseplayBtnRadius = canvas.height*0.1
-let paused = false
+let paused = true
 
 const resetBtnX = canvas.width*0.9
 const resetBtnY = canvas.height*0.8
@@ -122,14 +122,60 @@ function init() {
     console.log(cellWidth, cellHeight)
     console.log(pacmanspeed, ghostspeed)
 
-    // blueghost.pos.x = 7
-    // blueghost.pos.y = 9
-    // console.log(blueghost.dir, blueghost.nextTurn)
-    // blueghost.newdir()
-    // console.log(blueghost.dir, blueghost.nextTurn)
-    // console.log(grid[8][7])
-    // console.log(blueghost.validFuturePos(0, -1))
-    frame()
+    // Initial frame
+    c.clearRect(0, 0, canvas.width, canvas.height)
+    
+    c.lineWidth = 2
+    c.strokeRect(gameX, gameY, gameWidth, gameHeight)
+
+    drawGrid();
+
+    // Display score
+    c.fillStyle = 'white'
+    c.textAlign = 'center'
+    c.textBaseline = 'middle'
+    c.font = '30px Sans-Serif'
+    c.fillText(`Score: ${score}`, canvas.width*0.5, canvas.height*0.85)
+
+    pacman.draw();
+    redghost.draw();
+    blueghost.draw();
+
+    // Custom grid maker
+    c.font = '18px Sans-Serif'
+    c.fillStyle = 'blue'
+    c.beginPath()
+    c.arc(customGridBtnX, customGridBtnY, customGridBtnRadius, 0, Math.PI*2)
+    c.stroke()
+    c.fill()
+    c.fillStyle = 'black'
+    c.fillText('Make custom grid', customGridBtnX, customGridBtnY)
+
+    // Pauseplay button
+    c.fillStyle = 'orange'
+    c.beginPath()
+    c.arc(pauseplayBtnX, pauseplayBtnY, pauseplayBtnRadius, 0, Math.PI*2)
+    c.stroke()
+    c.fill()
+    c.fillStyle = 'white'
+    // Play sign
+    c.fillStyle = 'green'
+    c.beginPath()
+    c.moveTo(pauseplayBtnX-pauseplayBtnRadius/2, pauseplayBtnY-pauseplayBtnRadius/2)
+    c.lineTo(pauseplayBtnX+pauseplayBtnRadius/2, pauseplayBtnY)
+    c.lineTo(pauseplayBtnX-pauseplayBtnRadius/2, pauseplayBtnY+pauseplayBtnRadius/2)
+    c.lineTo(pauseplayBtnX-pauseplayBtnRadius/2, pauseplayBtnY-pauseplayBtnRadius/2)
+    c.stroke()
+    c.fill()
+
+    // Reset button for testing
+    c.fillStyle = 'red'
+    c.beginPath()
+    c.arc(resetBtnX, resetBtnY, resetBtnRadius, 0, Math.PI*2)
+    c.stroke()
+    c.fill()
+    c.fillStyle = 'black'
+    c.fillText('Reset', resetBtnX, resetBtnY)
 }
 
 function drawGrid() {
