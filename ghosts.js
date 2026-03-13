@@ -19,11 +19,14 @@ class Ghost {
 
     newdir() {
         let availableDirs = [{x:-1,y:0}, {x:1,y:0}, {x:0, y:1}, {x:0,y:-1}]
-        availableDirs.forEach((dir, ind) => {
-            if (!this.validFuturePos(dir.x, dir.y)) {
-                availableDirs.splice(ind, 1)
+        for (let i = 0; i < availableDirs.length; i++) {
+            if (!this.validFuturePos(availableDirs[i].x, availableDirs[i].y)) {
+                availableDirs.splice(i, 1)
+                i--;
             }
-        })
+        }
+        console.log(`available dirs at ${this.pos.x}, ${this.pos.y}`)
+        console.log(availableDirs)
         
         // Pick random valid direction
         this.nextTurn = availableDirs[Math.floor(Math.random()*availableDirs.length)]
@@ -85,6 +88,8 @@ class Ghost {
         if ((this.x >= (gameX+(cellWidth/2))) && (this.x <= (gameX+((gridWidth-1)*cellWidth)+(cellWidth/2)))
             && (this.y >= (gameY+(cellHeight/2))) && (this.y <= (gameY+((gridHeight-1)*cellHeight)+(cellHeight/2)))) {
             
+            this.updatepos()
+            
             if (this.nextTurn) {
                 const xcenter = (this.x+(cellWidth/2)-gameX)%cellWidth
                 const ycenter = (this.y+(cellHeight/2)-gameY)%cellHeight
@@ -102,10 +107,14 @@ class Ghost {
             this.x += this.dir.x*this.speed
             this.y += this.dir.y*this.speed
 
-            this.updatepos()
-
             if (!this.validFuturePos(this.dir.x, this.dir.y)) {
                 this.newdir()
+            } else {
+                // 1% chance to change direction
+                if (Math.random() < 0.01) {
+                    console.log('randomly changing direction')
+                    this.newdir()
+                }
             }
         } else {
             this.align()

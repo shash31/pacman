@@ -21,7 +21,11 @@ const customGridBtnX = canvas.width*0.9
 const customGridBtnY = canvas.height*0.2
 const customGridBtnRadius = canvas.height*0.1
 
-// Reset button for testing
+const pauseplayBtnX = canvas.width*0.9
+const pauseplayBtnY = canvas.height*0.5
+const pauseplayBtnRadius = canvas.height*0.1
+let paused = false
+
 const resetBtnX = canvas.width*0.9
 const resetBtnY = canvas.height*0.8
 const resetBtnRadius = canvas.height*0.1
@@ -118,6 +122,13 @@ function init() {
     console.log(cellWidth, cellHeight)
     console.log(pacmanspeed, ghostspeed)
 
+    // blueghost.pos.x = 7
+    // blueghost.pos.y = 9
+    // console.log(blueghost.dir, blueghost.nextTurn)
+    // blueghost.newdir()
+    // console.log(blueghost.dir, blueghost.nextTurn)
+    // console.log(grid[8][7])
+    // console.log(blueghost.validFuturePos(0, -1))
     frame()
 }
 
@@ -257,8 +268,20 @@ function frame() {
     c.fillStyle = 'black'
     c.fillText('Make custom grid', customGridBtnX, customGridBtnY)
 
-    // Reset button for testing
+    // Pause button
     c.fillStyle = 'orange'
+    c.beginPath()
+    c.arc(pauseplayBtnX, pauseplayBtnY, pauseplayBtnRadius, 0, Math.PI*2)
+    c.stroke()
+    c.fill()
+    c.fillStyle = 'white'
+    if (!paused) {
+        // Pause sign
+        c.fillRect(pauseplayBtnX-pauseplayBtnRadius/2, pauseplayBtnY-pauseplayBtnRadius/2, pauseplayBtnRadius*0.25, pauseplayBtnRadius)
+        c.fillRect(pauseplayBtnX+pauseplayBtnRadius/2-pauseplayBtnRadius*0.25, pauseplayBtnY-pauseplayBtnRadius/2, pauseplayBtnRadius*0.25, pauseplayBtnRadius)
+    }
+    // Reset button for testing
+    c.fillStyle = 'red'
     c.beginPath()
     c.arc(resetBtnX, resetBtnY, resetBtnRadius, 0, Math.PI*2)
     c.stroke()
@@ -316,8 +339,33 @@ canvas.addEventListener('click', (e) => {
             cancelAnimationFrame(animationID)
             init() // Using custom grid
         }
+        return;
     }
-    
+
+    const distToPausePlay = Math.sqrt(Math.pow(e.clientX-pauseplayBtnX,2)+Math.pow(e.clientY-pauseplayBtnY,2))
+    if (distToPausePlay <= pauseplayBtnRadius) {
+        if (paused) {
+            paused = false
+            frame()
+        } else {
+            paused = true
+            cancelAnimationFrame(animationID)
+            // Clear pause sign lines
+            c.fillStyle = 'orange'
+            c.fillRect(pauseplayBtnX-pauseplayBtnRadius/2, pauseplayBtnY-pauseplayBtnRadius/2, pauseplayBtnRadius*0.25, pauseplayBtnRadius)
+            c.fillRect(pauseplayBtnX+pauseplayBtnRadius/2-pauseplayBtnRadius*0.25, pauseplayBtnY-pauseplayBtnRadius/2, pauseplayBtnRadius*0.25, pauseplayBtnRadius)
+            // Play sign
+            c.fillStyle = 'green'
+            c.beginPath()
+            c.moveTo(pauseplayBtnX-pauseplayBtnRadius/2, pauseplayBtnY-pauseplayBtnRadius/2)
+            c.lineTo(pauseplayBtnX+pauseplayBtnRadius/2, pauseplayBtnY)
+            c.lineTo(pauseplayBtnX-pauseplayBtnRadius/2, pauseplayBtnY+pauseplayBtnRadius/2)
+            c.lineTo(pauseplayBtnX-pauseplayBtnRadius/2, pauseplayBtnY-pauseplayBtnRadius/2)
+            c.stroke()
+            c.fill()
+        }
+    }
+
     const distToReset = Math.sqrt(Math.pow(e.clientX-resetBtnX, 2)+Math.pow(e.clientY-resetBtnY, 2))
     if (distToReset <= resetBtnRadius) {
         if (!drawingGrid) {
@@ -329,5 +377,6 @@ canvas.addEventListener('click', (e) => {
             customGrid = undefined
             init()
         }
+        return;
     }
 })
