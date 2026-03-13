@@ -6,8 +6,38 @@ class Ghost {
         this.radius = cellHeight*0.3
         this.color = color
 
-        this.dir;
+        // Initializing with random direction
+        this.dir = { x: 0, y: 0 }
+        if (Math.random() < 0.5) {
+            this.dir.x = Math.random() < 0.5 ? -1 : 1
+        } else {
+            this.dir.y = Math.random() < 0.5 ? -1 : 1
+        }
+        this.nextTurn = undefined;
         this.speed = speed
+    }
+
+    newdir() {
+        let availableDirs = [{x:-1,y:0}, {x:1,y:0}, {x:0, y:1}, {x:0,y:-1}]
+        availableDirs.forEach((dir, ind) => {
+            if (!this.validFuturePos(dir.x, dir.y)) {
+                availableDirs.splice(ind, 1)
+            }
+        })
+        
+        // Pick random valid direction
+        this.nextTurn = availableDirs[Math.floor(Math.random()*availableDirs.length)]
+    }
+
+    validFuturePos(xdir, ydir) {
+        const futureposx = this.pos.x+xdir; const futureposy = this.pos.y+ydir;
+        if (this.inbounds(futureposx, futureposy) && (grid[futureposy][futureposx] != 'W')) return true
+        return false
+    }
+
+    inbounds(x, y) {
+        if ((0 <= x) && (x < gridWidth) && (0 <= y) && (y < gridHeight)) return true
+        return false
     }
 
     draw() {
@@ -39,5 +69,53 @@ class Ghost {
         c.arc(this.x+xdist, this.y-ydist, 2, 0, Math.PI*2)
         c.stroke()
         c.fill()
+    }
+
+    align() {
+        this.x = gameX + this.pos.x*cellWidth + (cellWidth/2)
+        this.y = gameY + this.pos.y*cellHeight + (cellHeight/2)
+    }
+     
+    stop() {
+        this.align()
+        this.dir.x = 0
+        this.dir.y = 0
+    }
+
+    updatepos() {
+        this.pos.x = Math.floor((this.x - gameX)/cellWidth)
+        this.pos.y = Math.floor((this.y - gameY)/cellHeight)
+    }
+
+    update() {
+        if ((this.x >= (gameX+(cellWidth/2))) && (this.x <= (gameX+((gridWidth-1)*cellWidth)+(cellWidth/2)))
+            && (this.y >= (gameY+(cellHeight/2))) && (this.y <= (gameY+((gridHeight-1)*cellHeight)+(cellHeight/2)))) {
+            
+            if (this.nextTurn) {
+                const xcenter = (this.x+(cellWidth/2)-gameX)%cellWidth
+                const ycenter = (this.y+(cellHeight/2)-gameY)%cellHeight
+                const xmargin = cellWidth*0.04
+                const ymargin = cellHeight*0.04
+                const xalign = Math.abs(xcenter-cellWidth) <= xmargin || Math.abs(xcenter) <= xmargin
+                const yalign = Math.abs(ycenter-cellHeight) <= ymargin || Math.abs(ycenter) <= ymargin
+                if (xalign && yalign){
+                    this.dir.x = this.nextTurn.x; this.dir.y = this.nextTurn.y
+                    this.nextTurn = undefined
+                    this.align()
+                }
+            }
+
+            this.x += this.dir.x*this.speed
+            this.y += this.dir.y*this.speed
+
+            this.updatepos()
+
+            if (!this.validFuturePos(this.dir.x, this.dir.y)) {
+                this.newdir()
+            }
+        } else {
+            this.align()
+            this.newdir()
+        }
     }
 }

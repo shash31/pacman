@@ -7,7 +7,7 @@ const c = canvas.getContext('2d')
 
 // TODO:
 // 1) Make ghosts chase you
-// 2) Add boosts
+// 2) Add the boost or whatever
 // 3) Eat ghosts
 // 4) Respawn ghosts
 // 3) Make grid maker
@@ -95,7 +95,7 @@ function init() {
     cellHeight = gameHeight / gridHeight
 
     pacmanspeed = cellHeight/12
-    ghostspeed = cellHeight/13
+    ghostspeed = cellHeight/10
 
     score = 0
 
@@ -221,8 +221,21 @@ function frame() {
     pacman.draw();
     pacman.update();
 
+    // Food eating detection
+    if (grid[pacman.pos.y][pacman.pos.x] == 'F') {
+        const xcenter = gameX + pacman.pos.x*cellWidth + cellWidth/2
+        const ycenter = gameY + pacman.pos.y*cellHeight + cellHeight/2
+        // If food in pacman's mouth, eat
+        if (Math.abs(pacman.x - xcenter) <= pacman.radius && Math.abs(pacman.y - ycenter) <= pacman.radius) {
+            grid[pacman.pos.y][pacman.pos.x] = 0
+            score += 10
+        }
+    }
+
     redghost.draw();
     blueghost.draw();
+    redghost.update();
+    blueghost.update()
 
     // Custom grid maker
     c.font = '18px Sans-Serif'
@@ -245,7 +258,7 @@ function frame() {
 
     // Ghost collision detection
     if ((Math.abs(pacman.x - redghost.x) <= cellWidth*0.1 && Math.abs(pacman.y - redghost.y) <= cellHeight*0.1)
-    || (Math.abs(pacman.x - blueghost.x) <= cellWidth*0.1 && Math.abs(pacman.y - redghost.y) <= cellHeight*0.1)
+    || (Math.abs(pacman.x - blueghost.x) <= cellWidth*0.1 && Math.abs(pacman.y - blueghost.y) <= cellHeight*0.1)
     ) {
         console.log('game end')
         stopGame()

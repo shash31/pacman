@@ -143,10 +143,6 @@ class Pacman {
     updatepos() {
         this.pos.x = Math.floor((this.x - gameX)/cellWidth)
         this.pos.y = Math.floor((this.y - gameY)/cellHeight)
-        if (grid[this.pos.y][this.pos.x] == 'F') {
-            score += 10
-            grid[this.pos.y][this.pos.x] = 0
-        }
     }
 
     stop() {
@@ -170,7 +166,6 @@ class Pacman {
                 if (xalign && yalign){
                     this.dir.x = this.nextTurn.x; this.dir.y = this.nextTurn.y
                     if (this.turningQueue.length >= 1) {
-                        console.log('going to next turn in queue')
                         this.nextTurn = this.turningQueue[0]
                         this.turningQueue.splice(0, 1)
                     } else {
