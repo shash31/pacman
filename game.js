@@ -86,7 +86,17 @@ function init() {
         gridWidth = 10
         gridHeight = 10
 
-        grid = init2dGrid(gridWidth, gridHeight, 'F')
+        // grid = init2dGrid(gridWidth, gridHeight, 'F')
+        grid = [[0, "F", "F", "F", "F", "F", "F", "F", "F", "F"],
+                ["F", "W", "F", "W", "F", "F", "W", "F", "W", "F"],
+                ["F", "F", "F", "F", "F", "F", "F", "F", "F", "F"],
+                ["F", "W", "F", "F", "W", "W", "F", "F", "W", "F"],
+                ["F", "F", "F", "F", "W", "W", "F", "F", "F", "F"],
+                ["F", "F", "W", "F", "F", "F", "F", "W", "F", "F"],
+                ["F", "F", "W", "F", "F", "F", "F", "W", "F", "F"],
+                ["F", "W", "W", "F", "W", "W", "F", "W", "W", "F"],
+                ["F", "F", "W", "F", "W", "W", "F", "W", "F", "F"],
+                ["F", "F", "F", "F", "F", "F", "F", "F", "F", "F"]]
     }
 
     grid[0][0] = 0

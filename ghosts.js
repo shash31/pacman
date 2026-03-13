@@ -75,12 +75,6 @@ class Ghost {
         this.x = gameX + this.pos.x*cellWidth + (cellWidth/2)
         this.y = gameY + this.pos.y*cellHeight + (cellHeight/2)
     }
-     
-    stop() {
-        this.align()
-        this.dir.x = 0
-        this.dir.y = 0
-    }
 
     updatepos() {
         this.pos.x = Math.floor((this.x - gameX)/cellWidth)
