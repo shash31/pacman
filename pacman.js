@@ -20,6 +20,8 @@ class Pacman {
     }
 
     turn(e) {
+        if (!playingGame) return;
+        
         let turn;
         if (e.code == 'ArrowDown') {
             turn = { x: 0, y: 1 }
